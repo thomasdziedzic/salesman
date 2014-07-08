@@ -1,0 +1,6 @@
+.cabal-sandbox
+.vim-force.com
+cabal.sandbox.config
+dist
+*.jar
+*.xml

@@ -1,0 +1,2 @@
+update - check current versions against latest versions and deploy the latest versions
+delete - make sure deleting the packages does not break any dependencies, if not, create a destructive changes file and deploy
