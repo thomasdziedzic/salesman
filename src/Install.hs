@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Install
     ( install
@@ -9,12 +10,14 @@ import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import System.Directory (getHomeDirectory, createDirectoryIfMissing, doesDirectoryExist, getTemporaryDirectory, copyFile)
 import System.Process (callCommand, readProcess)
-import Data.Aeson (eitherDecode, FromJSON, encode)
+import Data.Aeson (eitherDecode, FromJSON(..), encode, (.:), Value(..))
 import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
 import Data.List ((\\), group, sort)
+import Control.Applicative ((<$>), (<*>))
+import Control.Monad (MonadPlus(..))
 
 import OptionTypes (Command(..), Common(..), Options(..))
 import Paths_salesman (getDataFileName)
@@ -184,7 +187,11 @@ data PackageDescription = PackageDescription
     { pkgDepends :: [String]
     } deriving (Show, Generic)
 
-instance FromJSON PackageDescription
+instance FromJSON PackageDescription where
+    parseJSON (Object v) =
+        PackageDescription
+            <$> v .: "depends"
+    parseJSON _ = mzero
 
 duplicates :: Ord a => [a] -> [a]
 duplicates = concatMap (take 1 . tail) . group . sort
