@@ -14,7 +14,7 @@ import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
-import Data.List ((\\))
+import Data.List ((\\), group, sort)
 
 import OptionTypes (Command(..), Common(..), Options(..))
 import Paths_salesman (getDataFileName)
@@ -74,9 +74,18 @@ install packages = do
         then return ()
         else error $ "The following depends are missing: " ++ show missingDepends
 
+    -- perform file conflict checking
+    let allPackageEntries = newPackageEntries ++ entries packageDatabase
+        allFiles = concatMap files allPackageEntries
+        conflictingFiles = duplicates allFiles
+
+    if null conflictingFiles
+        then return ()
+        else error $ "The following file conflicts where found: " ++ show conflictingFiles
+
     -- update salesman_json with new data
     liftIO $ createDirectoryIfMissing True (targetDir ++ "/src/staticresources")
-    liftIO $ BL.writeFile (targetDir ++ "/src/staticresources/salesman_json.resource") (encode (PackageDatabase (newPackageEntries ++ entries packageDatabase)))
+    liftIO $ BL.writeFile (targetDir ++ "/src/staticresources/salesman_json.resource") (encode (PackageDatabase allPackageEntries))
 
     dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
     liftIO $ copyFile dbMeta (targetDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
@@ -176,3 +185,6 @@ data PackageDescription = PackageDescription
     } deriving (Show, Generic)
 
 instance FromJSON PackageDescription
+
+duplicates :: Ord a => [a] -> [a]
+duplicates = concatMap (take 1 . tail) . group . sort
