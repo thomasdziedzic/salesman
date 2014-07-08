@@ -185,7 +185,7 @@ trim = f . f
 
 data PackageDescription = PackageDescription
     { pkgDepends :: [String]
-    } deriving (Show, Generic)
+    } deriving (Show)
 
 instance FromJSON PackageDescription where
     parseJSON (Object v) =
