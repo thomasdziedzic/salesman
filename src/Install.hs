@@ -14,6 +14,7 @@ import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
+import Data.List ((\\))
 
 import OptionTypes (Command(..), Common(..), Options(..))
 import Paths_salesman (getDataFileName)
@@ -54,15 +55,28 @@ install packages = do
     liftIO $ putStrLn "downloading package"
 
     -- get each package and download it locally
-    packageEntries <- liftIO $ mapM (downloadPackage targetDir) packages
+    newPackageEntries <- liftIO $ mapM (downloadPackage targetDir) packages
 
     -- copy simple package xml for consistency
     packageXml <- liftIO $ getDataFileName "package.xml"
     liftIO $ copyFile packageXml (targetDir ++ "/src/package.xml")
 
+    -- check if all the dependencies are satisfied
+    let installedPackageDatabaseEntries = (entries packageDatabase)
+        installedPackageNames = map name installedPackageDatabaseEntries
+        allPackageNames = installedPackageNames ++ packages
+        installedPackageDepends = concatMap depends installedPackageDatabaseEntries
+        stagedPackageDepends = concatMap depends newPackageEntries
+        allPackageDepends = installedPackageDepends ++ stagedPackageDepends
+        missingDepends = allPackageDepends \\ allPackageNames
+
+    if null missingDepends
+        then return ()
+        else error $ "The following depends are missing: " ++ show missingDepends
+
     -- update salesman_json with new data
     liftIO $ createDirectoryIfMissing True (targetDir ++ "/src/staticresources")
-    liftIO $ BL.writeFile (targetDir ++ "/src/staticresources/salesman_json.resource") (encode (PackageDatabase (packageEntries ++ entries packageDatabase)))
+    liftIO $ BL.writeFile (targetDir ++ "/src/staticresources/salesman_json.resource") (encode (PackageDatabase (newPackageEntries ++ entries packageDatabase)))
 
     dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
     liftIO $ copyFile dbMeta (targetDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
