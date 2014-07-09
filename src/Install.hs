@@ -15,14 +15,14 @@ import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
-import Data.List ((\\), group, sort)
+import Data.List (group, sort)
 import Control.Applicative ((<$>), (<*>))
 import Control.Monad (MonadPlus(..))
 
 import OptionTypes (Command(..), Common(..), Options(..))
 import Paths_salesman (getDataFileName)
 import Instance (downloadInstance)
-import Database (PackageDatabase(..), PackageDatabaseEntry(..), databaseContainsPackage, findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson)
+import Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies)
 import Process (readCommand)
 
 install :: (MonadReader Common m, MonadIO m) => [String] -> m ()
@@ -65,13 +65,9 @@ install packages = do
     liftIO $ copyFile packageXml (targetDir ++ "/src/package.xml")
 
     -- check if all the dependencies are satisfied
-    let installedPackageDatabaseEntries = (entries packageDatabase)
-        installedPackageNames = map name installedPackageDatabaseEntries
-        allPackageNames = installedPackageNames ++ packages
-        installedPackageDepends = concatMap depends installedPackageDatabaseEntries
-        stagedPackageDepends = concatMap depends newPackageEntries
-        allPackageDepends = installedPackageDepends ++ stagedPackageDepends
-        missingDepends = allPackageDepends \\ allPackageNames
+    let allPackageDatabaseEntries = (entries packageDatabase) ++ newPackageEntries
+        updatedPackageDatabase = PackageDatabase allPackageDatabaseEntries
+        missingDepends = findMissingDependencies updatedPackageDatabase
 
     if null missingDepends
         then return ()
@@ -159,7 +155,8 @@ downloadPackage targetDir package = do
         else callCommand $ "cd " ++ packageDir ++ " && git checkout " ++ latestVersion
 
     stdout <- readCommand $ "cd " ++ packageDir ++ " && find src | grep '\\..*$' | grep -v '\\.xml$'"
-    let files = lines stdout
+    -- drop the src/ prefix
+    let files = map (drop 4) (lines stdout)
 
     packageDescriptionFile <- BL.readFile $ packageDir ++ "/package.json"
 

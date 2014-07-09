@@ -8,6 +8,7 @@ import Options.Applicative (subparser, command, info, argument, str, progDesc, h
 import OptionTypes (Command(..), Common(..), Options(..))
 import Install (install)
 import List (list)
+import Remove (remove)
 
 commonParser :: Parser Common
 commonParser = Common
@@ -43,8 +44,8 @@ run :: Options -> IO ()
 run Options { optCommon = optCommon, optCommand = Install pkgs } = runReaderT (install pkgs) optCommon
 {-
 run Upgrade = putStrLn "Upgrading"
-run (Remove pkgs) = putStrLn $ "Removing: " ++ show pkgs
 -}
+run Options { optCommon = optCommon, optCommand = Remove pkgs } = runReaderT (remove pkgs) optCommon
 run Options { optCommon = optCommon, optCommand = List } = runReaderT list optCommon
 run options = print options
 
