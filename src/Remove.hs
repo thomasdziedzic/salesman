@@ -14,7 +14,7 @@ import Data.Aeson (encode)
 
 import OptionTypes (Command(..), Common(..), Options(..))
 import Instance (downloadInstance)
-import Database (PackageDatabase(..), PackageDatabaseEntry(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesXml, createDestructiveChangesSpecificComponents)
+import Database (PackageDatabase(..), PackageDatabaseEntry(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
 import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()

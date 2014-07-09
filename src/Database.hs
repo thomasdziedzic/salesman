@@ -9,7 +9,6 @@ module Database
     , findNotInstalledPackages
     , findMissingDependencies
     , deletePackages
-    , createDestructiveChangesXml
     , createDestructiveChangesSpecificComponents
     , PackageDatabaseEntry(..)
     , PackageDatabase(..)
@@ -21,11 +20,7 @@ import Data.Aeson (eitherDecode, FromJSON, ToJSON)
 import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import System.Directory (doesFileExist)
-import Data.List ((\\), find)
-import qualified Data.Map as M
-import Data.Map (Map)
-import Data.List.Split (splitOn)
-import Data.Maybe (mapMaybe)
+import Data.List ((\\))
 import qualified Data.Set as S
 
 parseSalesmanJson :: (MonadReader r m, MonadIO m) => FilePath -> m PackageDatabase
@@ -45,10 +40,6 @@ doesSalesmanJsonExist instanceDir =
 databaseContainsPackage :: PackageDatabase -> String -> Bool
 databaseContainsPackage (PackageDatabase { .. }) packageName =
     not . null $ filter (\x -> packageName == (name x)) entries
-
-findPackage :: PackageDatabase -> String -> Maybe PackageDatabaseEntry
-findPackage packageDatabase packageName =
-    find (\x -> name x == packageName) (entries packageDatabase)
 
 findInstalledPackages :: PackageDatabase -> [String] -> [String]
 findInstalledPackages packageDatabase packages =
@@ -81,49 +72,6 @@ findMissingDependencies packageDatabase = packageDepends \\ packageNames
     packageDatabaseEntries = (entries packageDatabase)
     packageNames = map name packageDatabaseEntries
     packageDepends = concatMap depends packageDatabaseEntries
-
-createDestructiveChangesXml :: PackageDatabase -> [String] -> String
-createDestructiveChangesXml packageDatabase packages =
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" ++ 
-    "<Package xmlns=\"http://soap.sforce.com/2006/04/metadata\">" ++
-    types ++
-    "</Package>"
-  where
-    metadataMap = M.unions $ map (createDestructiveChangesMap packageDatabase) packages
-    membersMap = M.map (foldr (\a b -> "<members>" ++ a ++ "</members>\n") "") metadataMap
-    membersList = M.toList membersMap
-    typesList = map (\(k, v) -> v ++ "<name>" ++ k ++ "</name>\n") membersList
-    types = unlines typesList
-
-createDestructiveChangesMap :: PackageDatabase -> String -> Map String [String]
-createDestructiveChangesMap packageDatabase package =
-    case findPackage packageDatabase package of
-        Just entry -> createMetadataMap entry
-        Nothing -> M.empty
-
-createMetadataMap :: PackageDatabaseEntry -> Map String [String]
-createMetadataMap entry = fromListGroupByKey $ mapMaybe relevantMapping (files entry)
-
-fromListGroupByKey :: [(String, String)] -> Map String [String]
-fromListGroupByKey [] = M.empty
-fromListGroupByKey ((metadata, file):xs) = M.insertWith (++) metadata [file] (fromListGroupByKey xs)
-
-relevantMapping :: String -> Maybe (String, String)
-relevantMapping rawPath =
-    case metadata of
-        Just m -> Just (m, fileWithoutExtension)
-        Nothing -> Nothing
-  where
-    [_, folder, file] = splitOn "/" rawPath
-    folderToMetadata = M.fromList [
-          ("classes", "ApexClass")
-        , ("components", "ApexComponent")
-        , ("pages", "ApexPage")
-        , ("staticresources", "StaticResource")
-        , ("triggers", "ApexTrigger")
-        ]
-    metadata = M.lookup folder folderToMetadata
-    fileWithoutExtension = takeWhile (/= '.') "test.xml"
 
 deletePackages :: PackageDatabase -> [String] -> PackageDatabase
 deletePackages packageDatabase packages =
