@@ -9,7 +9,7 @@ import System.Process (callCommand)
 import System.IO.Temp (createTempDirectory)
 import System.Directory (copyFile, createDirectoryIfMissing, getTemporaryDirectory)
 
-import OptionTypes (Command(..), Common(..), Options(..))
+import OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
 
 downloadInstance :: (MonadReader Common m, MonadIO m) => m FilePath

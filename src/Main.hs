@@ -1,3 +1,5 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Main where
 
 import Control.Monad.Reader (runReaderT)
@@ -41,11 +43,10 @@ optionsParser = Options
     <*> commandParser
 
 run :: Options -> IO ()
-run Options { optCommon = optCommon, optCommand = Install pkgs } = runReaderT (install pkgs) optCommon
-run Options { optCommon = optCommon, optCommand = Upgrade } = error "upgrade not implemented"
-run Options { optCommon = optCommon, optCommand = Remove pkgs } = runReaderT (remove pkgs) optCommon
-run Options { optCommon = optCommon, optCommand = List } = runReaderT list optCommon
-run options = print options
+run Options { optCommon, optCommand = Install pkgs } = runReaderT (install pkgs) optCommon
+run Options { optCommand = Upgrade } = error "upgrade not implemented"
+run Options { optCommon, optCommand = Remove pkgs } = runReaderT (remove pkgs) optCommon
+run Options { optCommon, optCommand = List } = runReaderT list optCommon
 
 opts :: ParserInfo Options
 opts = info (optionsParser <**> helper) idm

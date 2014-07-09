@@ -12,9 +12,9 @@ import System.Process (callCommand)
 import qualified Data.ByteString.Lazy as BL
 import Data.Aeson (encode)
 
-import OptionTypes (Command(..), Common(..), Options(..))
+import OptionTypes (Common(..))
 import Instance (downloadInstance)
-import Database (PackageDatabase(..), PackageDatabaseEntry(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
+import Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
 import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()

@@ -8,9 +8,8 @@ module List
 import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 
-import OptionTypes (Command(..), Common(..), Options(..))
+import OptionTypes (Common(..))
 import Database (parseSalesmanJson, PackageDatabase(..), PackageDatabaseEntry(..))
-import Paths_salesman (getDataFileName)
 import Instance (downloadInstance)
 
 list :: (MonadReader Common m, MonadIO m) => m ()
