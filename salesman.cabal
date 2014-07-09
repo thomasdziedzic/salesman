@@ -11,7 +11,10 @@ category:            Distribution
 build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
-data-files:          data/package.xml
+data-dir:            data
+data-files:          package.xml
+                   , emptyPackage.xml
+                   , salesman_json.resource-meta.xml
 
 executable salesman
   main-is:             Main.hs
