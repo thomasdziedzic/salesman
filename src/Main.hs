@@ -42,9 +42,7 @@ optionsParser = Options
 
 run :: Options -> IO ()
 run Options { optCommon = optCommon, optCommand = Install pkgs } = runReaderT (install pkgs) optCommon
-{-
-run Upgrade = putStrLn "Upgrading"
--}
+run Options { optCommon = optCommon, optCommand = Upgrade } = error "upgrade not implemented"
 run Options { optCommon = optCommon, optCommand = Remove pkgs } = runReaderT (remove pkgs) optCommon
 run Options { optCommon = optCommon, optCommand = List } = runReaderT list optCommon
 run options = print options
