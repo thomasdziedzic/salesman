@@ -9,17 +9,17 @@ module Install
 import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import System.Directory (getHomeDirectory, createDirectoryIfMissing, doesDirectoryExist, getTemporaryDirectory, copyFile)
-import System.Process (callCommand, readProcess)
+import System.Process (callCommand)
 import Data.Aeson (eitherDecode, FromJSON(..), encode, (.:), Value(..))
 import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
 import Data.List (group, sort)
-import Control.Applicative ((<$>), (<*>))
+import Control.Applicative ((<$>))
 import Control.Monad (MonadPlus(..))
 
-import OptionTypes (Command(..), Common(..), Options(..))
+import OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
 import Instance (downloadInstance)
 import Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies)
@@ -154,9 +154,9 @@ downloadPackage targetDir package = do
         then error $ "There are no tags for " ++ package
         else callCommand $ "cd " ++ packageDir ++ " && git checkout " ++ latestVersion
 
-    stdout <- readCommand $ "cd " ++ packageDir ++ " && find src | grep '\\..*$' | grep -v '\\.xml$'"
+    rawFiles <- readCommand $ "cd " ++ packageDir ++ " && find src | grep '\\..*$' | grep -v '\\.xml$'"
     -- drop the src/ prefix
-    let files = map (drop 4) (lines stdout)
+    let stagedFiles = map (drop 4) (lines rawFiles)
 
     packageDescriptionFile <- BL.readFile $ packageDir ++ "/package.json"
 
@@ -167,7 +167,7 @@ downloadPackage targetDir package = do
     -- stage files
     callCommand $ "cp -r " ++ packageSrc ++ " " ++ targetDir
 
-    return $ PackageDatabaseEntry package latestVersion files (pkgDepends packageDescription)
+    return $ PackageDatabaseEntry package latestVersion stagedFiles (pkgDepends packageDescription)
 
 data PackageIndex = PackageIndex
     { githubUser :: String
