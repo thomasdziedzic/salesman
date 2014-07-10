@@ -22,7 +22,7 @@ import Control.Monad (MonadPlus(..), unless)
 import Salesman.OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
 import Salesman.Instance (downloadInstance)
-import Salesman.Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies, writeSalesmanJson)
+import Salesman.Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, parseSalesmanJsonDefault, findMissingDependencies, writeSalesmanJson)
 import Salesman.Process (readCommand)
 
 install :: (MonadReader Common m, MonadIO m) => [String] -> m ()
@@ -38,10 +38,8 @@ install packages = do
     -- check if the instance doesn't have these packages already
     -- installed in the salesman_json file
     instanceDir <- downloadInstance
-    salesmanJsonExists <- doesSalesmanJsonExist instanceDir
-    packageDatabase <- if salesmanJsonExists
-                           then parseSalesmanJson instanceDir
-                           else return $ PackageDatabase []
+    packageDatabase <- parseSalesmanJsonDefault instanceDir
+
     let existingPackages = findInstalledPackages packageDatabase packages
     unless (null existingPackages) $
         error $ "Packages already installed: " ++ show existingPackages

@@ -5,6 +5,7 @@ module Salesman.Database
     ( PackageDatabaseEntry(..)
     , PackageDatabase(..)
     , parseSalesmanJson
+    , parseSalesmanJsonDefault
     , doesSalesmanJsonExist
     , findInstalledPackages
     , findNotInstalledPackages
@@ -56,6 +57,14 @@ writeSalesmanJson instanceDir packageDatabase = do
 
     dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
     liftIO $ copyFile dbMeta (instanceDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
+
+parseSalesmanJsonDefault :: MonadIO m => FilePath -> m PackageDatabase
+parseSalesmanJsonDefault instanceDir = do
+    salesmanJsonExists <- doesSalesmanJsonExist instanceDir
+
+    if salesmanJsonExists
+        then parseSalesmanJson instanceDir
+        else return $ PackageDatabase []
 
 doesSalesmanJsonExist :: (MonadIO m) => FilePath -> m Bool
 doesSalesmanJsonExist instanceDir =

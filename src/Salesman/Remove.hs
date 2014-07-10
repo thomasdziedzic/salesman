@@ -13,7 +13,7 @@ import Control.Monad (unless)
 
 import Salesman.OptionTypes (Common(..))
 import Salesman.Instance (downloadInstance)
-import Salesman.Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents, writeSalesmanJson)
+import Salesman.Database (parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents, writeSalesmanJson)
 import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()
@@ -22,10 +22,7 @@ remove packages = do
 
     -- let packageDatabase = read salesman json
     instanceDir <- downloadInstance
-    salesmanJsonExists <- doesSalesmanJsonExist instanceDir
-    packageDatabase <- if salesmanJsonExists
-                           then parseSalesmanJson instanceDir
-                           else return $ PackageDatabase []
+    packageDatabase <- parseSalesmanJson instanceDir
 
     -- make sure packages to be uninstalled are actually installed
     let notInstalledPackages = findNotInstalledPackages packageDatabase packages
