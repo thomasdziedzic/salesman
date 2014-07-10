@@ -17,7 +17,7 @@ import System.IO.Temp (createTempDirectory)
 import Data.Char (isSpace)
 import Data.List (group, sort)
 import Control.Applicative ((<$>))
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), unless)
 
 import OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
@@ -27,7 +27,7 @@ import Process (readCommand)
 
 install :: (MonadReader Common m, MonadIO m) => [String] -> m ()
 install packages = do
-    config <- reader $ optProperties
+    config <- reader optProperties
 
     home <- liftIO getHomeDirectory
     let salesmanDir = home ++ "/" ++ ".salesman"
@@ -43,9 +43,8 @@ install packages = do
                            then parseSalesmanJson instanceDir
                            else return $ PackageDatabase []
     let existingPackages = findInstalledPackages packageDatabase packages
-    if not . null $ existingPackages
-        then error $ "Packages already installed: " ++ show existingPackages
-        else return ()
+    unless (null existingPackages) $
+        error $ "Packages already installed: " ++ show existingPackages
 
     liftIO $ putStrLn "downloading repo"
 
@@ -65,22 +64,20 @@ install packages = do
     liftIO $ copyFile packageXml (targetDir ++ "/src/package.xml")
 
     -- check if all the dependencies are satisfied
-    let allPackageDatabaseEntries = (entries packageDatabase) ++ newPackageEntries
+    let allPackageDatabaseEntries = entries packageDatabase ++ newPackageEntries
         updatedPackageDatabase = PackageDatabase allPackageDatabaseEntries
         missingDepends = findMissingDependencies updatedPackageDatabase
 
-    if null missingDepends
-        then return ()
-        else error $ "The following depends are missing: " ++ show missingDepends
+    unless (null missingDepends) $
+        error $ "The following depends are missing: " ++ show missingDepends
 
     -- perform file conflict checking
     let allPackageEntries = newPackageEntries ++ entries packageDatabase
         allFiles = concatMap files allPackageEntries
         conflictingFiles = duplicates allFiles
 
-    if null conflictingFiles
-        then return ()
-        else error $ "The following file conflicts where found: " ++ show conflictingFiles
+    unless (null conflictingFiles) $
+        error $ "The following file conflicts where found: " ++ show conflictingFiles
 
     -- update salesman_json with new data
     liftIO $ createDirectoryIfMissing True (targetDir ++ "/src/staticresources")
@@ -101,9 +98,10 @@ downloadRepo user repo = do
 
     repoDirExists <- doesDirectoryExist repoDir
 
-    if repoDirExists
-         then callCommand $ "cd " ++ repoDir ++ " && git checkout master && git pull"
-         else callCommand $ "git clone " ++ githubUrl user repo ++ " " ++ repoDir
+    callCommand $
+        if repoDirExists
+            then "cd " ++ repoDir ++ " && git checkout master && git pull"
+            else "git clone " ++ githubUrl user repo ++ " " ++ repoDir
 
 githubUrl :: String -> String -> String
 githubUrl user repo = "https://github.com/" ++ user ++ "/" ++ repo ++ ".git"

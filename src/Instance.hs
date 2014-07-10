@@ -14,7 +14,7 @@ import Paths_salesman (getDataFileName)
 
 downloadInstance :: (MonadReader Common m, MonadIO m) => m FilePath
 downloadInstance = do
-    properties <- reader $ optProperties
+    properties <- reader optProperties
 
     tmpDir <- liftIO getTemporaryDirectory
     targetDir <- liftIO $ createTempDirectory tmpDir "salesman."

@@ -27,11 +27,9 @@ parseSalesmanJson :: (MonadReader r m, MonadIO m) => FilePath -> m PackageDataba
 parseSalesmanJson targetDir = do
     salesmanJson <- liftIO $ BL.readFile $ targetDir ++ "/src/staticresources/salesman_json.resource"
 
-    packageDatabase <- case eitherDecode salesmanJson of
-                           Left errorMessage -> error errorMessage
-                           Right db -> return db
-
-    return packageDatabase
+    case eitherDecode salesmanJson of
+        Left errorMessage -> error errorMessage
+        Right db -> return db
 
 doesSalesmanJsonExist :: (MonadIO m) => FilePath -> m Bool
 doesSalesmanJsonExist instanceDir =
@@ -39,11 +37,10 @@ doesSalesmanJsonExist instanceDir =
 
 databaseContainsPackage :: PackageDatabase -> String -> Bool
 databaseContainsPackage (PackageDatabase { .. }) packageName =
-    not . null $ filter (\x -> packageName == (name x)) entries
+    not . null $ filter (\x -> packageName == name x) entries
 
 findInstalledPackages :: PackageDatabase -> [String] -> [String]
-findInstalledPackages packageDatabase packages =
-    filter (databaseContainsPackage packageDatabase) packages
+findInstalledPackages packageDatabase = filter (databaseContainsPackage packageDatabase)
 
 data PackageDatabaseEntry = PackageDatabaseEntry
     { name :: String
@@ -63,13 +60,12 @@ instance FromJSON PackageDatabase
 instance ToJSON PackageDatabase
 
 findNotInstalledPackages :: PackageDatabase -> [String] -> [String]
-findNotInstalledPackages packageDatabase packages =
-    filter (not . (databaseContainsPackage packageDatabase)) packages
+findNotInstalledPackages packageDatabase = filter (not . databaseContainsPackage packageDatabase)
 
 findMissingDependencies :: PackageDatabase -> [String]
 findMissingDependencies packageDatabase = packageDepends \\ packageNames
   where
-    packageDatabaseEntries = (entries packageDatabase)
+    packageDatabaseEntries = entries packageDatabase
     packageNames = map name packageDatabaseEntries
     packageDepends = concatMap depends packageDatabaseEntries
 

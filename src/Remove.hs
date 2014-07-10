@@ -11,6 +11,7 @@ import System.IO.Temp (createTempDirectory)
 import System.Process (callCommand)
 import qualified Data.ByteString.Lazy as BL
 import Data.Aeson (encode)
+import Control.Monad (unless)
 
 import OptionTypes (Common(..))
 import Instance (downloadInstance)
@@ -19,7 +20,7 @@ import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()
 remove packages = do
-    config <- reader $ optProperties
+    config <- reader optProperties
 
     -- let packageDatabase = read salesman json
     instanceDir <- downloadInstance
@@ -31,17 +32,15 @@ remove packages = do
     -- make sure packages to be uninstalled are actually installed
     let notInstalledPackages = findNotInstalledPackages packageDatabase packages
 
-    if null notInstalledPackages
-        then return ()
-        else error $ "The following packages are not installed: " ++ show notInstalledPackages
+    unless (null notInstalledPackages) $
+        error $ "The following packages are not installed: " ++ show notInstalledPackages
 
     -- make sure depends are still satisfied after removing the packages
     let newPackageDatabase = deletePackages packageDatabase packages
     let missingDepends = findMissingDependencies newPackageDatabase
 
-    if null missingDepends
-        then return ()
-        else error $ "The following depends will not be satisfied after removal: " ++ show missingDepends
+    unless (null missingDepends) $
+        error $ "The following depends will not be satisfied after removal: " ++ show missingDepends
 
     tmpDir <- liftIO getTemporaryDirectory
     deployDir <- liftIO $ createTempDirectory tmpDir "salesman."
@@ -61,11 +60,6 @@ remove packages = do
 
     -- remove the packages
     liftIO $ writeFile (instanceDir ++ "/src/specificComponents") (createDestructiveChangesSpecificComponents packageDatabase packages)
-
-    -- copy empty package.xml
-    -- http://www.salesforce.com/us/developer/docs/daas/Content/daas_destructive_changes.htm
-    --emptyPackageXml <- liftIO $ getDataFileName "emptyPackage.xml"
-    --liftIO $ copyFile emptyPackageXml (instanceDir ++ "/src/package.xml")
 
     -- deploy destructive changes
     liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=deleteMetadata --projectPath=" ++ instanceDir ++ " --responseFilePath=/dev/null --config=" ++ config ++ " --specificComponents=" ++ instanceDir ++ "/src/specificComponents"
