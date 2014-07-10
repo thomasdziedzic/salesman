@@ -10,7 +10,7 @@ import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import System.Directory (getHomeDirectory, createDirectoryIfMissing, doesDirectoryExist, getTemporaryDirectory, copyFile)
 import System.Process (callCommand)
-import Data.Aeson (eitherDecode, FromJSON(..), encode, (.:), Value(..))
+import Data.Aeson (eitherDecode, FromJSON(..), (.:), Value(..))
 import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import System.IO.Temp (createTempDirectory)
@@ -22,7 +22,7 @@ import Control.Monad (MonadPlus(..), unless)
 import Salesman.OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
 import Salesman.Instance (downloadInstance)
-import Salesman.Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies)
+import Salesman.Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies, writeSalesmanJson)
 import Salesman.Process (readCommand)
 
 install :: (MonadReader Common m, MonadIO m) => [String] -> m ()
@@ -80,11 +80,7 @@ install packages = do
         error $ "The following file conflicts where found: " ++ show conflictingFiles
 
     -- update salesman_json with new data
-    liftIO $ createDirectoryIfMissing True (targetDir ++ "/src/staticresources")
-    liftIO $ BL.writeFile (targetDir ++ "/src/staticresources/salesman_json.resource") (encode (PackageDatabase allPackageEntries))
-
-    dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
-    liftIO $ copyFile dbMeta (targetDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
+    writeSalesmanJson targetDir (PackageDatabase allPackageEntries)
 
     -- deploy
     liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=deployAll --projectPath=" ++ targetDir ++ " --responseFilePath=/dev/null --config=" ++ config

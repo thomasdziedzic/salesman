@@ -11,15 +11,18 @@ module Salesman.Database
     , findMissingDependencies
     , deletePackages
     , createDestructiveChangesSpecificComponents
+    , writeSalesmanJson
     ) where
 
 import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
-import Data.Aeson (eitherDecode, FromJSON, ToJSON)
+import Data.Aeson (eitherDecode, FromJSON, ToJSON, encode)
 import Control.Monad.IO.Class (MonadIO(..))
-import System.Directory (doesFileExist)
+import System.Directory (doesFileExist, copyFile, createDirectoryIfMissing)
 import Data.List ((\\))
 import qualified Data.Set as S
+
+import Paths_salesman (getDataFileName)
 
 data PackageDatabaseEntry = PackageDatabaseEntry
     { name :: String
@@ -45,6 +48,14 @@ parseSalesmanJson targetDir = do
     case eitherDecode salesmanJson of
         Left errorMessage -> error errorMessage
         Right db -> return db
+
+writeSalesmanJson :: MonadIO m => FilePath -> PackageDatabase -> m ()
+writeSalesmanJson instanceDir packageDatabase = do
+    liftIO $ createDirectoryIfMissing True (instanceDir ++ "/src/staticresources")
+    liftIO $ BL.writeFile (instanceDir ++ "/src/staticresources/salesman_json.resource") (encode packageDatabase)
+
+    dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
+    liftIO $ copyFile dbMeta (instanceDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
 
 doesSalesmanJsonExist :: (MonadIO m) => FilePath -> m Bool
 doesSalesmanJsonExist instanceDir =

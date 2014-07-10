@@ -6,16 +6,14 @@ module Salesman.Remove
 
 import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
-import System.Directory (copyFile, createDirectoryIfMissing, getTemporaryDirectory)
+import System.Directory (copyFile, getTemporaryDirectory)
 import System.IO.Temp (createTempDirectory)
 import System.Process (callCommand)
-import qualified Data.ByteString.Lazy as BL
-import Data.Aeson (encode)
 import Control.Monad (unless)
 
 import Salesman.OptionTypes (Common(..))
 import Salesman.Instance (downloadInstance)
-import Salesman.Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
+import Salesman.Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents, writeSalesmanJson)
 import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()
@@ -46,11 +44,7 @@ remove packages = do
     deployDir <- liftIO $ createTempDirectory tmpDir "salesman."
 
     -- create new salesman json
-    liftIO $ createDirectoryIfMissing True (deployDir ++ "/src/staticresources")
-    liftIO $ BL.writeFile (deployDir ++ "/src/staticresources/salesman_json.resource") (encode newPackageDatabase)
-
-    dbMeta <- liftIO $ getDataFileName "salesman_json.resource-meta.xml"
-    liftIO $ copyFile dbMeta (deployDir ++ "/src/staticresources/salesman_json.resource-meta.xml")
+    writeSalesmanJson deployDir newPackageDatabase
 
     packageXml <- liftIO $ getDataFileName "package.xml"
     liftIO $ copyFile packageXml (deployDir ++ "/src/package.xml")
