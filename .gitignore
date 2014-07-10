@@ -3,5 +3,4 @@
 cabal.sandbox.config
 dist
 *.jar
-*.xml
 *.swp
