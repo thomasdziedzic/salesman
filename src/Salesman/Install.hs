@@ -2,7 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Install
+module Salesman.Install
     ( install
     ) where
 
@@ -19,11 +19,11 @@ import Data.List (group, sort)
 import Control.Applicative ((<$>))
 import Control.Monad (MonadPlus(..), unless)
 
-import OptionTypes (Common(..))
+import Salesman.OptionTypes (Common(..))
 import Paths_salesman (getDataFileName)
-import Instance (downloadInstance)
-import Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies)
-import Process (readCommand)
+import Salesman.Instance (downloadInstance)
+import Salesman.Database (PackageDatabase(..), PackageDatabaseEntry(..), findInstalledPackages, doesSalesmanJsonExist, parseSalesmanJson, findMissingDependencies)
+import Salesman.Process (readCommand)
 
 install :: (MonadReader Common m, MonadIO m) => [String] -> m ()
 install packages = do

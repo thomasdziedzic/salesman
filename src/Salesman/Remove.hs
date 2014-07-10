@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 
-module Remove
+module Salesman.Remove
     ( remove
     ) where
 
@@ -13,9 +13,9 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Aeson (encode)
 import Control.Monad (unless)
 
-import OptionTypes (Common(..))
-import Instance (downloadInstance)
-import Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
+import Salesman.OptionTypes (Common(..))
+import Salesman.Instance (downloadInstance)
+import Salesman.Database (PackageDatabase(..), doesSalesmanJsonExist, parseSalesmanJson, findNotInstalledPackages, findMissingDependencies, deletePackages, createDestructiveChangesSpecificComponents)
 import Paths_salesman (getDataFileName)
 
 remove :: (MonadReader Common m, MonadIO m) => [String] -> m ()

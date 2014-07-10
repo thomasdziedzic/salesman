@@ -1,4 +1,4 @@
-module Process
+module Salesman.Process
     ( readCommand
     ) where
 

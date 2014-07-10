@@ -19,13 +19,13 @@ data-files:          package.xml
 executable salesman
   main-is:             Main.hs
   ghc-options:         -Wall
-  other-modules:       OptionTypes
-                     , Install
-                     , List
-                     , Database
-                     , Instance
-                     , Process
-                     , Remove
+  other-modules:       Salesman.OptionTypes
+                     , Salesman.Install
+                     , Salesman.List
+                     , Salesman.Database
+                     , Salesman.Instance
+                     , Salesman.Process
+                     , Salesman.Remove
   -- other-extensions:
   build-depends:       base >= 4.7 && < 4.8
                      , optparse-applicative >= 0.9.0 && < 0.10

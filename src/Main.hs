@@ -7,10 +7,10 @@ import Control.Applicative (pure, (<$>), (<**>), some, (<*>))
 import Data.Monoid ((<>))
 import Options.Applicative (subparser, command, info, argument, str, progDesc, helper, idm, execParser, metavar, Parser, ParserInfo, strOption, help, long, short)
 
-import OptionTypes (Command(..), Common(..), Options(..))
-import Install (install)
-import List (list)
-import Remove (remove)
+import Salesman.OptionTypes (Command(..), Common(..), Options(..))
+import Salesman.Install (install)
+import Salesman.List (list)
+import Salesman.Remove (remove)
 
 commonParser :: Parser Common
 commonParser = Common

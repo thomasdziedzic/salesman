@@ -1,4 +1,4 @@
-module OptionTypes
+module Salesman.OptionTypes
     ( Command(..)
     , Common(..)
     , Options(..)

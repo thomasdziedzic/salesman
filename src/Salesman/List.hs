@@ -1,16 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module List
+module Salesman.List
     ( list
     ) where
 
 import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 
-import OptionTypes (Common(..))
-import Database (parseSalesmanJson, PackageDatabase(..), PackageDatabaseEntry(..))
-import Instance (downloadInstance)
+import Salesman.OptionTypes (Common(..))
+import Salesman.Database (parseSalesmanJson, PackageDatabase(..), PackageDatabaseEntry(..))
+import Salesman.Instance (downloadInstance)
 
 list :: (MonadReader Common m, MonadIO m) => m ()
 list = do

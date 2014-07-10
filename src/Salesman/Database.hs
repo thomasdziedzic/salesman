@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Database
+module Salesman.Database
     ( parseSalesmanJson
     , doesSalesmanJsonExist
     , databaseContainsPackage
