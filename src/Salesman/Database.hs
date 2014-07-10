@@ -23,6 +23,23 @@ import System.Directory (doesFileExist)
 import Data.List ((\\))
 import qualified Data.Set as S
 
+data PackageDatabaseEntry = PackageDatabaseEntry
+    { name :: String
+    , version :: String
+    , files :: [String]
+    , depends :: [String]
+    } deriving (Show, Generic)
+
+instance FromJSON PackageDatabaseEntry
+instance ToJSON PackageDatabaseEntry
+
+data PackageDatabase = PackageDatabase
+    { entries :: [PackageDatabaseEntry]
+    } deriving (Show, Generic)
+
+instance FromJSON PackageDatabase
+instance ToJSON PackageDatabase
+
 parseSalesmanJson :: (MonadReader r m, MonadIO m) => FilePath -> m PackageDatabase
 parseSalesmanJson targetDir = do
     salesmanJson <- liftIO $ BL.readFile $ targetDir ++ "/src/staticresources/salesman_json.resource"
@@ -41,23 +58,6 @@ databaseContainsPackage (PackageDatabase { .. }) packageName =
 
 findInstalledPackages :: PackageDatabase -> [String] -> [String]
 findInstalledPackages packageDatabase = filter (databaseContainsPackage packageDatabase)
-
-data PackageDatabaseEntry = PackageDatabaseEntry
-    { name :: String
-    , version :: String
-    , files :: [String]
-    , depends :: [String]
-    } deriving (Show, Generic)
-
-instance FromJSON PackageDatabaseEntry
-instance ToJSON PackageDatabaseEntry
-
-data PackageDatabase = PackageDatabase
-    { entries :: [PackageDatabaseEntry]
-    } deriving (Show, Generic)
-
-instance FromJSON PackageDatabase
-instance ToJSON PackageDatabase
 
 findNotInstalledPackages :: PackageDatabase -> [String] -> [String]
 findNotInstalledPackages packageDatabase = filter (not . databaseContainsPackage packageDatabase)
