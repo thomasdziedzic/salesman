@@ -16,7 +16,6 @@ module Salesman.Database
 import GHC.Generics (Generic)
 import qualified Data.ByteString.Lazy as BL
 import Data.Aeson (eitherDecode, FromJSON, ToJSON)
-import Control.Monad.Reader.Class (MonadReader(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import System.Directory (doesFileExist)
 import Data.List ((\\))
@@ -39,7 +38,7 @@ data PackageDatabase = PackageDatabase
 instance FromJSON PackageDatabase
 instance ToJSON PackageDatabase
 
-parseSalesmanJson :: (MonadReader r m, MonadIO m) => FilePath -> m PackageDatabase
+parseSalesmanJson :: MonadIO m => FilePath -> m PackageDatabase
 parseSalesmanJson targetDir = do
     salesmanJson <- liftIO $ BL.readFile $ targetDir ++ "/src/staticresources/salesman_json.resource"
 
