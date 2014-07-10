@@ -6,7 +6,6 @@ module Salesman.Database
     , PackageDatabase(..)
     , parseSalesmanJson
     , parseSalesmanJsonDefault
-    , doesSalesmanJsonExist
     , findInstalledPackages
     , findNotInstalledPackages
     , findMissingDependencies
