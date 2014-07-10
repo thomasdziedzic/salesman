@@ -2,16 +2,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module Salesman.Database
-    ( parseSalesmanJson
+    ( PackageDatabaseEntry(..)
+    , PackageDatabase(..)
+    , parseSalesmanJson
     , doesSalesmanJsonExist
-    , databaseContainsPackage
     , findInstalledPackages
     , findNotInstalledPackages
     , findMissingDependencies
     , deletePackages
     , createDestructiveChangesSpecificComponents
-    , PackageDatabaseEntry(..)
-    , PackageDatabase(..)
     ) where
 
 import GHC.Generics (Generic)
