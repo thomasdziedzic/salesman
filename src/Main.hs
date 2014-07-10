@@ -26,6 +26,9 @@ commandParser = subparser
     ( command "install"
         (info (Install <$> some (argument str (metavar "PACKAGE...")))
             (progDesc "Install packages"))
+   <> command "check"
+        (info (pure Check)
+            (progDesc "Check for upgrades"))
    <> command "upgrade"
         (info (pure Upgrade)
             (progDesc "Upgrade packages"))
@@ -44,6 +47,7 @@ optionsParser = Options
 
 run :: Options -> IO ()
 run Options { optCommon, optCommand = Install pkgs } = runReaderT (install pkgs) optCommon
+run Options { optCommand = Check } = error "check not implemented"
 run Options { optCommand = Upgrade } = error "upgrade not implemented"
 run Options { optCommon, optCommand = Remove pkgs } = runReaderT (remove pkgs) optCommon
 run Options { optCommon, optCommand = List } = runReaderT list optCommon

@@ -6,6 +6,7 @@ module Salesman.OptionTypes
 
 data Command
     = Install [String]
+    | Check
     | Upgrade
     | Remove [String]
     | List
