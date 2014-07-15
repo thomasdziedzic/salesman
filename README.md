@@ -12,7 +12,13 @@ sales(force) man(ager)
     git clone https://github.com/gostrc/salesman.git
     ```
 
-3. Install
+3. Download the tooling api tool
+    ```
+    cd salesman
+    curl -O https://github.com/neowit/tooling-force.com/releases/download/v0.1.4.2/tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar
+    ```
+
+4. Install
     ```
     cabal install
     ```
