@@ -47,11 +47,11 @@ remove packages = do
     liftIO $ copyFile packageXml (deployDir ++ "/src/package.xml")
 
     -- deploy salesman json
-    liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=deployAll --projectPath=" ++ deployDir ++ " --responseFilePath=/dev/null --config=" ++ config
+    liftIO $ callCommand $ "java -jar ~/.salesman/tooling-force.com.jar --action=deployAll --projectPath=" ++ deployDir ++ " --responseFilePath=/dev/null --config=" ++ config
 
     -- remove the packages
     liftIO $ writeFile (instanceDir ++ "/src/specificComponents") (createDestructiveChangesSpecificComponents packageDatabase packages)
 
     -- deploy destructive changes
-    liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=deleteMetadata --projectPath=" ++ instanceDir ++ " --responseFilePath=/dev/null --config=" ++ config ++ " --specificComponents=" ++ instanceDir ++ "/src/specificComponents"
+    liftIO $ callCommand $ "java -jar ~/.salesman/tooling-force.com.jar --action=deleteMetadata --projectPath=" ++ instanceDir ++ " --responseFilePath=/dev/null --config=" ++ config ++ " --specificComponents=" ++ instanceDir ++ "/src/specificComponents"
 

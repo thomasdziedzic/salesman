@@ -5,7 +5,7 @@ sales(force) man(ager)
 
 ## Installation
 
-1. Dependencies: ghc, git.
+1. Dependencies: ghc, cabal-install, git, java.
 
 2. Clone repository.
     ```
@@ -13,10 +13,9 @@ sales(force) man(ager)
     ```
 
 3. Download the tooling api tool
-    ```
-    cd salesman
-    curl -O https://github.com/neowit/tooling-force.com/releases/download/v0.1.4.2/tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar
-    ```
+    - You can find releases at https://github.com/neowit/tooling-force.com/releases
+    - Download the released jar to ```~/.salesman/```
+    - Create a symlink from ```~/.salesman/tooling-force.com.jar``` to the location you downloaded the jar file e.g. ```cd ~/.salesman && ln -s tooling-force.com-0.1.4.3.jar tooling-force.com.jar```
 
 4. Install
     ```

@@ -81,7 +81,7 @@ install packages = do
     writeSalesmanJson targetDir (PackageDatabase allPackageEntries)
 
     -- deploy
-    liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=deployAll --projectPath=" ++ targetDir ++ " --responseFilePath=/dev/null --config=" ++ config
+    liftIO $ callCommand $ "java -jar ~/.salesman/tooling-force.com.jar --action=deployAll --projectPath=" ++ targetDir ++ " --responseFilePath=/dev/null --config=" ++ config
 
 downloadRepo :: String -> String -> IO ()
 downloadRepo user repo = do

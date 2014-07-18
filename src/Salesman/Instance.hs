@@ -27,7 +27,7 @@ downloadInstance = do
 
     liftIO $ copyFile packageXml (srcDir ++ "/package.xml")
 
-    liftIO $ callCommand $ "java -jar tooling-force.com-0.1.4.2-getCompilerErrors-fix.jar --action=refresh --projectPath=" ++ targetDir ++ " --responseFilePath=/dev/null --skipModifiedFilesCheck=true --config=" ++ properties ++ " --tempFolderPath=" ++ targetDir
+    liftIO $ callCommand $ "java -jar ~/.salesman/tooling-force.com.jar --action=refresh --projectPath=" ++ targetDir ++ " --responseFilePath=/dev/null --skipModifiedFilesCheck=true --config=" ++ properties ++ " --tempFolderPath=" ++ targetDir
 
     let refreshDir = targetDir ++ "/refresh"
         unpackagedDir = refreshDir ++ "/unpackaged"
